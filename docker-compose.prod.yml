@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: balcao-app-prod
+    container_name: counter-app-prod
     restart: unless-stopped
     env_file:
       - .env.prod
@@ -14,7 +14,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       REDIS_URL: ${REDIS_URL_DOCKER}
     ports:
-      - "${APP_PORT}:8080"
+      - "${APP_PORT}:8081"
     depends_on:
       postgres:
         condition: service_healthy
@@ -23,7 +23,7 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: balcao-postgres-prod
+    container_name: counter-postgres-prod
     restart: unless-stopped
     env_file:
       - .env.prod
@@ -44,7 +44,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: counter-redis-dev
+    container_name: counter-redis-prod
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
