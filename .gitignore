@@ -59,9 +59,14 @@ replay_pid*
 
 notes.txt
 
+.env.dev
+.env.prod
+
 src/main/resources/application.properties
 src/main/resources/application-dev.properties
 src/main/resources/application-prod.properties
 src/main/resources/application-test.properties
 
 src/main/resources/db/**
+
+planoDeImplementação.txt
