@@ -1,0 +1,54 @@
+@startuml
+title Tickets - Fluxos (MVP)
+
+actor Client
+participant "TicketController" as C
+participant "TicketService" as S
+database "Postgres" as DB
+
+== Criar ticket ==
+Client -> C: POST /queues/{queueId}/tickets {triage?, flags?}
+C -> S: createTicket(queueId, cmd)
+S -> DB: SELECT queue + desk
+DB --> S: queue|null
+alt queue não existe
+  S --> C: NotFound
+  C --> Client: 404
+else
+  S -> S: generate publicCode
+  S -> DB: INSERT ticket(status=WAITING, score=0)
+  DB --> S: created
+  S --> C: ticket DTO
+  C --> Client: 201
+end
+
+== Listar tickets (filtros) ==
+Client -> C: GET /tickets?deskId&queueId&status&dateFrom&dateTo
+C -> S: search(filters)
+S -> DB: SELECT with filters + order
+DB --> S: list
+S --> C: list
+C --> Client: 200
+
+== Cancelar ticket ==
+Client -> C: PATCH /tickets/{id}/cancel
+C -> S: cancel(id)
+S -> DB: SELECT ticket
+DB --> S: ticket|null
+alt não existe
+  C --> Client: 404
+else
+  alt status inválido para cancel
+    C --> Client: 409/422
+  else
+    S -> DB: UPDATE ticket status=CANCELED
+    C --> Client: 200
+  end
+end
+
+== Atualizar triagem ==
+Client -> C: PATCH /tickets/{id}/triage {triageLevel, flags}
+C -> S: updateTriage(id, cmd)
+S -> DB: UPDATE triage fields
+C --> Client: 200
+@enduml

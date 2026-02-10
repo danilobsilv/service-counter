@@ -1,0 +1,44 @@
+@startuml
+title Sessions - Atendimento
+
+actor Worker
+participant "SessionController" as C
+participant "SessionService" as S
+database "Postgres" as DB
+
+== Start ==
+Worker -> C: POST /sessions/{id}/start
+C -> S: start(id)
+S -> DB: SELECT session
+alt status != CALLED
+  C --> Worker: 409/422
+else
+  S -> DB: UPDATE session status=IN_SERVICE, started_at=now
+  S -> DB: UPDATE ticket status=IN_SERVICE
+  C --> Worker: 200
+end
+
+== Finish ==
+Worker -> C: POST /sessions/{id}/finish
+C -> S: finish(id)
+S -> DB: SELECT session + ticket
+alt status != IN_SERVICE
+  C --> Worker: 409/422
+else
+  S -> DB: UPDATE session status=DONE, ended_at=now
+  S -> DB: UPDATE ticket status=DONE
+  C --> Worker: 200
+end
+
+== No-show ==
+Worker -> C: POST /sessions/{id}/no-show
+C -> S: noShow(id)
+S -> DB: SELECT session + ticket
+alt status != CALLED
+  C --> Worker: 409/422
+else
+  S -> DB: UPDATE session status=NO_SHOW, ended_at=now
+  S -> DB: UPDATE ticket queue=RETURN, status=WAITING (ou DONE)
+  C --> Worker: 200
+end
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+title Reserva concorrente de assentos (extra)
+
+actor Client
+participant "ReservationController" as C
+participant "ReservationService" as S
+database "Postgres" as DB
+
+Client -> C: POST /events/{eventId}/seats/{seatId}/reserve
+C -> S: reserve(eventId, seatId, user)
+
+S -> DB: BEGIN
+S -> DB: SELECT seat FOR UPDATE
+alt seat já reservado (active reservation && reserved_until > now)
+  S -> DB: ROLLBACK
+  C --> Client: 409 Conflict
+else
+  S -> DB: INSERT reservation(status=RESERVED, reserved_until=now+TTL)
+  S -> DB: COMMIT
+  C --> Client: 201 Created
+end
+@enduml

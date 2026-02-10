@@ -1,0 +1,21 @@
+@startuml
+title Real-time (SSE) - Publicação de eventos
+
+actor Dashboard
+participant "SSEController" as C
+participant "EventService" as E
+database "Postgres" as DB
+
+== Conectar ==
+Dashboard -> C: GET /desks/{deskId}/events/stream
+C -> E: subscribe(deskId)
+E --> Dashboard: SSE connected
+
+== Evento em mudança de domínio ==
+participant "TicketService" as T
+
+T -> DB: UPDATE ticket status=CALLED
+T -> E: publish(deskId, type="ticket.called", entityId, payload)
+E -> DB: INSERT domain_event
+E --> Dashboard: SSE event ticket.called
+@enduml

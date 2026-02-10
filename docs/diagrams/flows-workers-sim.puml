@@ -1,0 +1,26 @@
+@startuml
+title Workers simulados - consumo concorrente
+
+actor "SimulationRunner" as Sim
+participant "NextTicketController" as C
+participant "NextTicketService" as S
+database "Postgres" as DB
+
+Sim -> C: spawn N workers
+loop each worker
+  Sim -> C: POST /desks/{deskId}/next-ticket {workerId}
+  C -> S: nextTicket(deskId, workerId)
+
+  S -> DB: BEGIN
+  S -> DB: SELECT next WAITING\nORDER BY score desc, created_at asc\nFOR UPDATE SKIP LOCKED
+  alt found
+    S -> DB: UPDATE ticket status=CALLED, called_at=now
+    S -> DB: INSERT session status=CALLED
+    S -> DB: COMMIT
+    C --> Sim: 200 ticket+session
+  else none
+    S -> DB: COMMIT
+    C --> Sim: 204 No Content
+  end
+end
+@enduml
