@@ -1,0 +1,154 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "Service Desk" {
+  class ServiceDesk {
+    +UUID id
+    +String name
+    +String timezone
+    +boolean isActive
+    +Instant createdAt
+    +Instant updatedAt
+  }
+}
+
+package "Queues" {
+  enum QueueCode {
+    NORMAL
+    PRIORITY
+    RETURN
+  }
+
+  class DeskQueue {
+    +UUID id
+    +UUID deskId
+    +QueueCode code
+    +String name
+    +boolean isActive
+    +Instant createdAt
+    +Instant updatedAt
+  }
+}
+
+package "Tickets" {
+  enum TicketStatus {
+    WAITING
+    CALLED
+    IN_SERVICE
+    DONE
+    CANCELED
+    EXPIRED
+  }
+
+  class Ticket {
+    +UUID id
+    +UUID deskId
+    +UUID queueId
+    +String publicCode
+    +TicketStatus status
+    +int priorityScore
+    +Integer triageLevel
+    +String flagsJson
+    +Instant createdAt
+    +Instant updatedAt
+    +Instant calledAt
+    +Instant slaDueAt
+  }
+}
+
+package "Rules" {
+  class RuleSet {
+    +UUID id
+    +UUID deskId
+    +String name
+    +boolean isActive
+    +int version
+    +Instant createdAt
+  }
+
+  class Rule {
+    +UUID id
+    +UUID ruleSetId
+    +int order
+    +String conditionJson
+    +String actionJson
+    +boolean isActive
+    +Instant createdAt
+  }
+}
+
+package "Sessions" {
+  enum SessionStatus {
+    CALLED
+    IN_SERVICE
+    DONE
+    NO_SHOW
+  }
+
+  class ServiceSession {
+    +UUID id
+    +UUID deskId
+    +UUID ticketId
+    +String workerId
+    +SessionStatus status
+    +Instant calledAt
+    +Instant startedAt
+    +Instant endedAt
+    +Instant createdAt
+  }
+}
+
+package "Events (Real-time)" {
+  class DomainEvent {
+    +UUID id
+    +UUID deskId
+    +String type
+    +UUID entityId
+    +String payloadJson
+    +Instant createdAt
+  }
+}
+
+package "Seats (Extra)" {
+  class Event {
+    +UUID id
+    +UUID deskId
+    +String name
+    +Instant startsAt
+  }
+
+  class Seat {
+    +UUID id
+    +UUID eventId
+    +String seatCode
+    +String status
+  }
+
+  class SeatReservation {
+    +UUID id
+    +UUID eventId
+    +UUID seatId
+    +String reservedBy
+    +String status
+    +Instant reservedUntil
+    +Instant createdAt
+  }
+}
+
+ServiceDesk "1" -- "many" DeskQueue
+ServiceDesk "1" -- "many" Ticket
+DeskQueue "1" -- "many" Ticket
+
+ServiceDesk "1" -- "many" RuleSet
+RuleSet "1" -- "many" Rule
+ServiceDesk "1" -- "many" ServiceSession
+Ticket "1" -- "0..1" ServiceSession
+
+ServiceDesk "1" -- "many" DomainEvent
+
+ServiceDesk "1" -- "many" Event
+Event "1" -- "many" Seat
+Event "1" -- "many" SeatReservation
+Seat "1" -- "0..many" SeatReservation
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+title ServiceDesk - Fluxos
+
+actor Client
+participant "ServiceDeskController" as C
+participant "ServiceDeskService" as S
+database "Postgres" as DB
+
+== Criar balcão ==
+Client -> C: POST /desks {name, timezone}
+C -> S: createDesk(cmd)
+S -> DB: INSERT service_desk
+DB --> S: created desk
+S --> C: desk DTO
+C --> Client: 201 Created
+
+== Buscar por id ==
+Client -> C: GET /desks/{id}
+C -> S: getById(id)
+S -> DB: SELECT by id
+DB --> S: desk | null
+S --> C: desk DTO | NotFound
+C --> Client: 200 OK | 404
+
+== Desativar (soft delete) ==
+Client -> C: DELETE /desks/{id}
+C -> S: deactivate(id)
+S -> DB: UPDATE is_active=false
+S --> C: ok
+C --> Client: 204 No Content
+@enduml

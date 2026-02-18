@@ -1,0 +1,36 @@
+@startuml
+title Queues - Fluxos
+
+actor Client
+participant "QueueController" as C
+participant "QueueService" as S
+database "Postgres" as DB
+
+== Criar fila em um balcão ==
+Client -> C: POST /desks/{deskId}/queues {code, name}
+C -> S: createQueue(deskId, cmd)
+S -> DB: SELECT service_desk exists?
+DB --> S: ok|null
+alt desk não existe
+  S --> C: NotFound
+  C --> Client: 404
+else
+  S -> DB: INSERT queue (unique deskId+code)
+  alt violação unique
+    S --> C: Conflict
+    C --> Client: 409
+  else
+    DB --> S: created
+    S --> C: queue DTO
+    C --> Client: 201
+  end
+end
+
+== Listar filas por balcão ==
+Client -> C: GET /desks/{deskId}/queues
+C -> S: listByDesk(deskId)
+S -> DB: SELECT queues by deskId
+DB --> S: list
+S --> C: list
+C --> Client: 200
+@enduml

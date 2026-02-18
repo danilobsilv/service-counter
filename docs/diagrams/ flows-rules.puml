@@ -1,0 +1,33 @@
+@startuml
+title Rules - Ruleset + Score
+
+actor Admin
+participant "RulesController" as C
+participant "RulesService" as S
+database "Postgres" as DB
+
+== Criar ruleset ==
+Admin -> C: POST /desks/{deskId}/rulesets {name}
+C -> S: createRuleSet(deskId)
+S -> DB: INSERT ruleset (inactive)
+DB --> S: created
+S --> C: 201
+
+== Ativar ruleset (somente 1 ativo) ==
+Admin -> C: POST /desks/{deskId}/rulesets/{rulesetId}/activate
+C -> S: activate(deskId, rulesetId)
+S -> DB: BEGIN
+S -> DB: UPDATE ruleset set inactive where deskId and active=true
+S -> DB: UPDATE ruleset set active=true where id=rulesetId and deskId=deskId
+S -> DB: COMMIT
+C --> Admin: 200
+
+== Recompute score em massa ==
+Admin -> C: POST /desks/{deskId}/tickets/recompute-score
+C -> S: recomputeScores(deskId)
+S -> DB: SELECT active ruleset + rules
+S -> DB: SELECT tickets WAITING
+S -> S: compute score for each
+S -> DB: UPDATE tickets score
+C --> Admin: 200
+@enduml
