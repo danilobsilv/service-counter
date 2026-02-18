@@ -29,8 +29,8 @@ public class DeskQueue extends BaseAuditEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "service_desk_id", nullable = false)
-    private ServiceDesk desk;
+    @JoinColumn(name = "service_desk_id")
+    private ServiceDesk serviceDesk;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "queue_code", nullable = false, length = 32)
