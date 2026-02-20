@@ -12,4 +12,6 @@ public interface ServiceDeskRepository extends JpaRepository<ServiceDesk, UUID> 
     Optional<ServiceDesk> findByIdAndIsActiveTrue(UUID id);
 
     Page<ServiceDesk> findAllByIsActiveTrue(Pageable pageable);
+
+    Optional<ServiceDesk> findByNameAndIsActiveTrue(String name);
 }

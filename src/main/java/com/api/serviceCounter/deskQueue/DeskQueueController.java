@@ -21,12 +21,8 @@ public class DeskQueueController {
         this.deskQueueService = deskQueueService;
     }
 
-    @PostMapping("/desks/{desk-id}")
-    public ResponseEntity<DeskQueueResponse> createQueue(
-            @PathVariable UUID deskId,
-            @RequestBody CreateDeskQueueRequest request,
-            UriComponentsBuilder uriBuilder
-    ) {
+    @PostMapping("/desks/{deskId}")
+    public ResponseEntity<DeskQueueResponse> createQueue(@PathVariable UUID deskId, @RequestBody CreateDeskQueueRequest request, UriComponentsBuilder uriBuilder) {
         DeskQueueResponse response = deskQueueService.createQueue(deskId, request);
 
         URI location = uriBuilder.path("/queues/{queueId}")
@@ -36,16 +32,13 @@ public class DeskQueueController {
         return ResponseEntity.created(location).body(response);
     }
 
-    @GetMapping("/desks/{desk-id}")
+    @GetMapping("/desks/{deskId}")
     public ResponseEntity<List<DeskQueueResponse>> listQueues(@PathVariable UUID deskId) {
         return ResponseEntity.ok(deskQueueService.listActiveQueues(deskId));
     }
 
-    @PatchMapping("/{queue-id}")
-    public ResponseEntity<DeskQueueResponse> updateQueue(
-            @PathVariable UUID queueId,
-            @RequestBody UpdateDeskQueueRequest request
-    ) {
+    @PatchMapping("/{queueId}")
+    public ResponseEntity<DeskQueueResponse> updateQueue(@PathVariable UUID queueId, @RequestBody UpdateDeskQueueRequest request) {
         return ResponseEntity.ok(deskQueueService.updateQueue(queueId, request));
     }
 }

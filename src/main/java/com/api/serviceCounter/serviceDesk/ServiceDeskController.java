@@ -41,22 +41,19 @@ public class ServiceDeskController {
         return ResponseEntity.ok(serviceDeskService.listDesks(pageable));
     }
 
-    @GetMapping("/desk-id/{desk-id}")
-    public ResponseEntity<DeskResponse> getDesk(@PathVariable UUID id) {
-        return ResponseEntity.ok(serviceDeskService.getDesk(id));
+    @GetMapping("/desk-id/{deskId}")
+    public ResponseEntity<DeskResponse> getDesk(@PathVariable UUID deskId) {
+        return ResponseEntity.ok(serviceDeskService.getDesk(deskId));
     }
 
-    @PatchMapping("/desk-id/{desk-id}")
-    public ResponseEntity<DeskResponse> updateDesk(
-            @PathVariable UUID id,
-            @RequestBody UpdateDeskRequest request
-    ) {
-        return ResponseEntity.ok(serviceDeskService.updateDesk(id, request));
+    @PatchMapping("/desk-id/{deskId}")
+    public ResponseEntity<DeskResponse> updateDesk(@PathVariable UUID deskId,@RequestBody UpdateDeskRequest request) {
+        return ResponseEntity.ok(serviceDeskService.updateDesk(deskId, request));
     }
 
-    @DeleteMapping("/desk-id/{desk-id}")
-    public ResponseEntity<Void> deleteDesk(@PathVariable UUID id) {
-        serviceDeskService.softDeleteDesk(id);
+    @DeleteMapping("/desk-id/{deskId}")
+    public ResponseEntity<Void> deleteDesk(@PathVariable UUID deskId) {
+        serviceDeskService.softDeleteDesk(deskId);
         return ResponseEntity.noContent().build();
     }
 }

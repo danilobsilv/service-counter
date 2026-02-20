@@ -39,7 +39,7 @@ public class DevSeedRunner implements CommandLineRunner {
     public void run(String... args) {
         if (!enabled) return;
 
-        ServiceDesk desk = deskRepo.findByName(deskName)
+        ServiceDesk desk = deskRepo.findByNameAndIsActiveTrue(deskName)
                 .orElseGet(() -> {
                     ServiceDesk d = new ServiceDesk();
                     d.setName(deskName);
